@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/HexClock-android.iml" filepath="$PROJECT_DIR$/HexClock-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hexclock/hexclock.iml" filepath="$PROJECT_DIR$/hexclock/hexclock.iml" />
+    </modules>
+  </component>
+</project>
+
