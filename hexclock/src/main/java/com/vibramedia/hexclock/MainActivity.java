@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.OvershootInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -42,18 +45,18 @@ public class MainActivity extends Activity implements View.OnTouchListener {
         hexText.setTypeface(face);
 
         hexText.setOnTouchListener(this);
-        hexText.setText("#123456");
 
         ViewTreeObserver viewTreeObserver = hexText.getViewTreeObserver();
         if (viewTreeObserver.isAlive()) {
             viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    hexText.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    hexText.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams) hexText.getLayoutParams();
-                    lParams.leftMargin = (getApplicationContext().getResources().getDisplayMetrics().widthPixels/2)-(hexText.getWidth()/2);
-                    lParams.topMargin = (getApplicationContext().getResources().getDisplayMetrics().heightPixels/2)-(hexText.getHeight()/2);
+                    lParams.leftMargin = getCenterLeftMargin();
+                    lParams.topMargin = getCenterTopMargin();
                     hexText.setLayoutParams(lParams);
+                    hexText.setMinWidth(hexText.getWidth());
                 }
             });
         }
@@ -80,12 +83,20 @@ public class MainActivity extends Activity implements View.OnTouchListener {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String hex = "#" + android.text.format.DateFormat.format("HHmmss", new Date());
+                    CharSequence hex = android.text.format.DateFormat.format("#HHmmss", new Date());
                     hexText.setText(hex);
-                    rl.setBackgroundColor(Color.parseColor(hex));
+                    rl.setBackgroundColor(Color.parseColor(hex.toString()));
                 }
             });
         }
+    }
+
+    private int getCenterLeftMargin() {
+        return (getApplicationContext().getResources().getDisplayMetrics().widthPixels/2)-(hexText.getWidth()/2);
+    }
+
+    private int getCenterTopMargin() {
+        return (getApplicationContext().getResources().getDisplayMetrics().heightPixels/2)-(hexText.getHeight()/2);
     }
 
     public boolean onTouch(View view, MotionEvent event) {
@@ -101,6 +112,31 @@ public class MainActivity extends Activity implements View.OnTouchListener {
                 break;
             case MotionEvent.ACTION_UP:
                 spring.setEndValue(0);
+                TranslateAnimation translation;
+                translation = new TranslateAnimation(0, getCenterLeftMargin()-lParams.leftMargin,
+                        0, getCenterTopMargin()-lParams.topMargin);
+                translation.setStartOffset(0);
+                translation.setDuration(300);
+                translation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {}
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        hexText.clearAnimation();
+                        RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams) hexText.getLayoutParams();
+                        lParams.leftMargin = getCenterLeftMargin();
+                        lParams.topMargin = getCenterTopMargin();
+                        lParams.rightMargin = 0;
+                        lParams.bottomMargin = 0;
+                        hexText.setLayoutParams(lParams);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                translation.setInterpolator(new OvershootInterpolator());
+                hexText.startAnimation(translation);
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
                 break;
@@ -109,11 +145,11 @@ public class MainActivity extends Activity implements View.OnTouchListener {
             case MotionEvent.ACTION_MOVE:
                 lParams.leftMargin = X - _xDelta;
                 lParams.topMargin = Y - _yDelta;
+                lParams.rightMargin = -250;
+                lParams.bottomMargin = -250;
                 view.setLayoutParams(lParams);
                 break;
         }
-//        hexText.invalidate();
         return true;
     }
-
 }

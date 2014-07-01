@@ -16,6 +16,9 @@
         android:layout_alignParentLeft="false"
         android:layout_alignParentRight="false"
         android:layout_alignParentBottom="false"
-        android:layout_alignWithParentIfMissing="false" />
+        android:layout_alignWithParentIfMissing="false"
+        android:singleLine="true"
+        android:text="#123456"
+        android:textAlignment="center" />
 
 </RelativeLayout>
